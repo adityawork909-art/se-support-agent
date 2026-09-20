@@ -51,3 +51,9 @@ def answer(question, skip_guardrail=None):
 if __name__ == "__main__":
     for q in ("What is the voltage?", "When does the breaker trip?"):
         print(answer(q))
+
+
+with span("guardrail.length", "guardrail", input="answer length"):
+    # A second guardrail: an answer longer than the support template is truncated before it is
+    # sent, so a model that rambles cannot produce an unreviewable reply.
+    MAX_ANSWER_CHARS = 600
