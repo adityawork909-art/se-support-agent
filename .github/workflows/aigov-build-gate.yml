@@ -1,0 +1,69 @@
+# AI-GOV build gate - reports to https://129-159-231-86.sslip.io/gov/v1/ingest
+#
+# The build phase, on every commit:
+#   1. Scaffold & instrument   the agent's tests run with tracing on (aigov/instrumentation.py)
+#   2. Trace conformance       the trace is checked against the control catalogue with OPA / Rego
+#   3. Eval dataset builder    traced runs become candidate cases; the versioned suite is re-run
+# The report reaches AI-GOV the moment this job runs, and a failed verdict fails the build.
+#
+# One repository secret is needed: AIGOV_INGEST_KEY (AI-GOV -> Receiver -> Create key).
+name: AI-GOV build gate
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-gate:
+    runs-on: ubuntu-latest
+    env:
+      AIGOV_RECEIVER: https://129-159-231-86.sslip.io/gov/v1/ingest
+      AIGOV_INGEST_KEY: ${{ secrets.AIGOV_INGEST_KEY }}
+      AIGOV_TRACE_FILE: aigov-spans.jsonl
+      AIGOV_AGENT_ENTRY: examples.demo_agent:answer
+      OTEL_SERVICE_NAME: ${{ github.event.repository.name }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: "1 Scaffold & instrument - install the agent and its tracing"
+        run: |
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install "opentelemetry-sdk>=1.25" pytest
+
+      - name: "1 Scaffold & instrument - run the agent's tests with tracing on"
+        run: python -m pytest -q
+
+      - name: "3 Eval dataset builder - traced runs become candidate cases"
+        run: python aigov/eval_dataset.py build
+
+      - name: "3 Eval dataset builder - re-run the versioned suite"
+        run: |
+          if [ -f evals/dataset.jsonl ]; then
+            python aigov/eval_dataset.py run
+          else
+            echo "No suite yet. Promote the candidates and commit them: python aigov/eval_dataset.py promote"
+          fi
+
+      - name: "2 Trace conformance - install OPA"
+        uses: open-policy-agent/setup-opa@v2
+        with:
+          version: latest
+
+      - name: "2 Trace conformance - check the trace and report to AI-GOV"
+        run: python aigov/trace_report.py
+
+      - name: Keep the candidate cases for review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aigov-eval-candidates
+          path: evals/candidates.jsonl
+          if-no-files-found: ignore
