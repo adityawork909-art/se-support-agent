@@ -1,0 +1,2 @@
+{"expected_output": "The panel runs at 400 volts three-phase.", "id": "035bca19cbb82d7a", "input": "What is the voltage?"}
+{"expected_output": "The breaker trips at 63 amps.", "id": "86fec96c37bc4973", "input": "When does the breaker trip?"}
