@@ -16,6 +16,12 @@ setup("demo-agent")
 FACTS = {
     "voltage": "The panel runs at 400 V three-phase.",
     "breaker": "The breaker trips at 63 A.",
+    "warranty": "The panel carries a 24 month warranty from the install date.",
+    "ingress": "The enclosure is rated IP54 for indoor use.",
+    "firmware": "The controller ships on firmware 3.8.2.",
+    "torque": "Terminal screws are tightened to 2.5 Nm.",
+    "standby": "The unit draws 12 W in standby.",
+    "temperature": "The rated ambient range is -10 C to 45 C.",
 }
 
 
@@ -48,6 +54,18 @@ def answer(question, skip_guardrail=None):
         return result
 
 
+QUESTIONS = (
+    "What is the voltage?",
+    "When does the breaker trip?",
+    "How long is the warranty?",
+    "What is the ingress rating?",
+    "Which firmware does it ship with?",
+    "What torque for the terminal screws?",
+    "What does it draw in standby?",
+    "What ambient temperature is it rated for?",
+)
+
+
 if __name__ == "__main__":
-    for q in ("What is the voltage?", "When does the breaker trip?"):
+    for q in QUESTIONS:
         print(answer(q))
