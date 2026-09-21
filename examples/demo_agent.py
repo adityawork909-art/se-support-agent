@@ -51,3 +51,8 @@ def answer(question, skip_guardrail=None):
 if __name__ == "__main__":
     for q in ("What is the voltage?", "When does the breaker trip?"):
         print(answer(q))
+
+
+with span("retriever.policy_source", "retriever", input="which policy answered this"):
+    # Cite which policy document the answer came from, so a reviewer can check it.
+    POLICY_SOURCE = "support/refund-policy.md"
