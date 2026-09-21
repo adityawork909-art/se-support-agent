@@ -1,6 +1,6 @@
 {
-  "cases": 2,
-  "content_hash": "ce16616b61bdad5287bdff6d9c4b834841e72aa6dbcf819724ba40c17b61dd4d",
+  "cases": 9,
+  "content_hash": "ebcd7b28341dd92f4e1dc786be74b3b37e5470ad10c7e54c56582b78395c51a9",
   "name": "support-regression",
-  "version": 1
+  "version": 2
 }

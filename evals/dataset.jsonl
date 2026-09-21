@@ -1,2 +1,9 @@
 {"expected_output": "The panel runs at 400 volts three-phase.", "id": "035bca19cbb82d7a", "input": "What is the voltage?"}
+{"expected_output": "The enclosure is rated IP54 for indoor use.", "id": "44bf3f4f58bd0c1c", "input": "What is the ingress rating?"}
+{"expected_output": "The panel carries a 24 month warranty from the install date.", "id": "45bfdff3629917b0", "input": "How long is the warranty?"}
+{"expected_output": "The rated ambient range is -10 C to 45 C.", "id": "53adc650db532420", "input": "What ambient temperature is it rated for?"}
+{"expected_output": "The unit draws 12 W in standby.", "id": "827160973a233871", "input": "What does it draw in standby?"}
 {"expected_output": "The breaker trips at 63 amps.", "id": "86fec96c37bc4973", "input": "When does the breaker trip?"}
+{"expected_output": "The controller ships on firmware 3.8.2.", "id": "be573b9f5380d7a8", "input": "Which firmware does it ship with?"}
+{"expected_output": "Terminal screws are tightened to 2.5 Nm.", "id": "e4e2145a7cafdf70", "input": "What torque for the terminal screws?"}
+{"expected_output": "I do not know.", "id": "fee25aa8878f250d", "input": "What colour is it?"}
