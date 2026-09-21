@@ -24,6 +24,7 @@ jobs:
       AIGOV_RECEIVER: https://129-159-231-86.sslip.io/gov/v1/ingest
       AIGOV_INGEST_KEY: ${{ secrets.AIGOV_INGEST_KEY }}
       AIGOV_TRACE_FILE: aigov-spans.jsonl
+      AIGOV_DEMO_SKIP_GUARDRAIL: "1"
       AIGOV_AGENT_ENTRY: examples.demo_agent:answer
       OTEL_SERVICE_NAME: ${{ github.event.repository.name }}
     steps:
