@@ -56,8 +56,39 @@ def load_spans(path):
                 "kind": kind if kind in KINDS else "other",
                 "status": "error" if s.get("status") == "error" else "ok",
                 "duration_ms": s.get("duration_ms", 0),
+                "attributes": reportable(s.get("attributes") or {}),
             })
     return spans
+
+
+# Which span attributes may leave this machine. An ALLOW-LIST, never a deny-list: a trace carries
+# the prompt and the completion in input.value / output.value, and those must never be sent. Adding
+# a key here is a deliberate decision that the key holds a measurement, not content.
+#
+#   how long, how much, how often, and why - never what was said.
+REPORTABLE = (
+    "gen_ai.request.model",
+    "gen_ai.response.model",
+    "llm.model_name",
+    "gen_ai.usage.input_tokens",
+    "gen_ai.usage.output_tokens",
+    "llm.token_count.prompt",
+    "llm.token_count.completion",
+    "gen_ai.request.retry_count",
+    "retry.count",
+    "aigov.decision",     # a short reason the agent wrote for itself, never the answer
+    "aigov.candidates",
+)
+
+
+def reportable(attrs):
+    """Only the allow-listed attributes, each clipped, so a long value cannot become a payload."""
+    out = {}
+    for key in REPORTABLE:
+        if key in attrs and attrs[key] not in (None, ""):
+            value = attrs[key]
+            out[key] = value if isinstance(value, (int, float)) else str(value)[:200]
+    return out
 
 
 def request(method, url, key, body=None):
