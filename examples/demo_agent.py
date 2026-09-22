@@ -26,10 +26,11 @@ FACTS = {
 
 
 def _lookup(question):
+    """Returns the fact and the reason it was chosen, so the choice can be recorded."""
     for word, fact in FACTS.items():
         if word in question.lower():
-            return fact
-    return ""
+            return fact, "matched the keyword %r" % word
+    return "", "no keyword in the question matched any known fact"
 
 
 def answer(question, skip_guardrail=None):
@@ -39,17 +40,33 @@ def answer(question, skip_guardrail=None):
         skip_guardrail = os.environ.get("AIGOV_DEMO_SKIP_GUARDRAIL") == "1"
     with span("agent.answer", "agent", input=question) as root:
         with span("retrieve.facts", "retriever", input=question) as step:
-            fact = _lookup(question)
+            fact, why = _lookup(question)
             step.set_attribute("output.value", fact)
+            step.set_attribute("aigov.decision", why)
+            step.set_attribute("aigov.candidates", len(FACTS))
         with span("llm.compose", "llm", input=question) as step:
             draft = fact or "I do not know."
             step.set_attribute("output.value", draft)
+            step.set_attribute(
+                "aigov.decision",
+                "answered from the retrieved fact" if fact else "refused: nothing retrieved to answer from",
+            )
         with span("tool.units", "tool", input=draft) as step:
             result = draft.replace(" V ", " volts ").replace(" A.", " amps.")
             step.set_attribute("output.value", result)
+            step.set_attribute(
+                "aigov.decision",
+                "rewrote unit symbols to words" if result != draft else "no unit symbols to rewrite",
+            )
         if not skip_guardrail:
             with span("guardrail.pii", "guardrail", input=result) as step:
-                step.set_attribute("output.value", "block" if "@" in result else "pass")
+                blocked = "@" in result
+                step.set_attribute("output.value", "block" if blocked else "pass")
+                step.set_attribute(
+                    "aigov.decision",
+                    "blocked: the answer contains an e-mail address" if blocked
+                    else "passed: no e-mail address in the answer",
+                )
         root.set_attribute("output.value", result)
         return result
 
